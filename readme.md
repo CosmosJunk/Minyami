@@ -138,7 +138,21 @@ cd Minyami
 npm install
 ```
 
-To build the project, just run `tsc`.
+**Build**
+```
+npx tsc --project tsconfig.json
+```
+
+**Run local executable**
+```
+node dist/index.js
+```
+
+**Development tips**
+```
+# Untrack the auto-generated npm-shrinkwrap.json lockfile
+git update-index --assume-unchanged npm-shrinkwrap.json
+```
 
 ## Copyright
 
