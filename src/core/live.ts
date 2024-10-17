@@ -6,6 +6,7 @@ import { loadM3U8 } from "../utils/m3u8";
 import logger from "../utils/log";
 import Downloader, { DownloadTask, LiveDownloaderConfig } from "./downloader";
 import { isEncryptedChunk, isNormalChunk, M3U8Chunk, Playlist } from "./m3u8";
+import { prettyPrintTrafficSpeed } from "../utils/common";
 import { TaskStatus } from "./file_concentrator";
 
 /**
@@ -277,16 +278,22 @@ export default class LiveDownloader extends Downloader {
                         this.taskStatusRecord[task.id] = TaskStatus.DONE;
                     }
 
+                    const currentTimestamp = new Date().valueOf();
                     const currentChunkInfo = {
                         taskname: task.filename,
                         finishedChunksCount: this.finishedChunkCount,
                         finishedChunkSize: this.finishedChunkSize,
-                        chunkSpeed: this.calculateSpeedByChunk(),
-                        ratioSpeed: this.calculateSpeedByRatio(),
+                        chunkSpeed: this.calculateSpeedByChunk(currentTimestamp),
+                        ratioSpeed: this.calculateSpeedByRatio(currentTimestamp),
+                        downloadSpeed: this.calculateSpeedBySize(currentTimestamp),
                     };
 
                     logger.info(
-                        `Processing ${currentChunkInfo.taskname} finished. (${currentChunkInfo.finishedChunksCount} chunks downloaded | Avg Speed: ${currentChunkInfo.chunkSpeed} chunks/s or ${currentChunkInfo.ratioSpeed}x)`
+                        `Processing ${currentChunkInfo.taskname} finished. (${
+                            currentChunkInfo.finishedChunksCount
+                        } chunks downloaded | Avg Speed: ${currentChunkInfo.chunkSpeed} chunks/s or ${
+                            currentChunkInfo.ratioSpeed
+                        }x | ${prettyPrintTrafficSpeed(currentChunkInfo.downloadSpeed)})`
                     );
                     logger.debug(`Downloaded chunk size aggregated: ${currentChunkInfo.finishedChunkSize}`);
 

@@ -475,15 +475,25 @@ class Downloader extends EventEmitter {
     /**
      * 计算以块计算的下载速度
      */
-    calculateSpeedByChunk() {
-        return (this.finishedChunkCount / Math.round((new Date().valueOf() - this.startedAt) / 1000)).toFixed(2);
+    calculateSpeedByChunk(currentTimestamp?: number): string {
+        const timeElapsed = Math.round(((currentTimestamp ?? new Date().valueOf()) - this.startedAt) / 1000);
+        return (this.finishedChunkCount / timeElapsed).toFixed(2);
     }
 
     /**
      * 计算以视频长度为基准下载速度倍率
      */
-    calculateSpeedByRatio() {
-        return (this.finishedChunkLength / Math.round((new Date().valueOf() - this.startedAt) / 1000)).toFixed(2);
+    calculateSpeedByRatio(currentTimestamp?: number): string {
+        const timeElapsed = Math.round(((currentTimestamp ?? new Date().valueOf()) - this.startedAt) / 1000);
+        return (this.finishedChunkLength / timeElapsed).toFixed(2);
+    }
+
+    /**
+     * Download speed
+     */
+    calculateSpeedBySize(currentTimestamp?: number): string {
+        const timeElapsed = Math.round(((currentTimestamp ?? new Date().valueOf()) - this.startedAt) / 1000);
+        return (this.finishedChunkSize / timeElapsed).toFixed(2);
     }
 
     setOnTaskOutputFileNaming(namingFunction: (chunk: M3U8Chunk, id: number) => string) {

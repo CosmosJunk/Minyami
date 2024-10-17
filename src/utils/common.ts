@@ -34,3 +34,22 @@ export function getFileExt(filePath: string): string {
     }
     return ext;
 }
+
+/** Print readable traffic speed */
+export function prettyPrintTrafficSpeed(bytesPerSecond: number | string): string {
+    const units: string[] = ["", "K", "M", "G", "T", "P", "E", "Z", "Y"];
+    let index = 0;
+
+    let bps = typeof bytesPerSecond === "string" ? parseInt(bytesPerSecond, 10) : bytesPerSecond;
+    if (isNaN(bps)) {
+        return `NaN`;
+    }
+
+    while (bps >= 1024 && index < units.length - 1) {
+        bps /= 1024;
+        index++;
+    }
+
+    // Format to one decimal place if necessary and return with appropriate unit
+    return `${bps.toFixed(bps < 10 && index > 0 ? 1 : 0)} ${units[index]}Bps`;
+}

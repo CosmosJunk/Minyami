@@ -14,7 +14,7 @@ import Downloader, {
     DownloadTask,
     DownloadTaskGroup,
 } from "./downloader";
-import { getFileExt } from "../utils/common";
+import { getFileExt, prettyPrintTrafficSpeed } from "../utils/common";
 import { TaskStatus } from "./file_concentrator";
 
 class ArchiveDownloader extends Downloader {
@@ -402,13 +402,15 @@ class ArchiveDownloader extends Downloader {
             this.handleTask(task)
                 .then(() => {
                     this.runningThreads--;
+                    const currentTimestamp = new Date().valueOf();
                     const currentChunkInfo = {
                         taskname: task.filename,
                         finishedChunksCount: this.finishedChunkCount,
                         finishedChunkSize: this.finishedChunkSize,
                         totalChunksCount: this.totalChunksCount,
-                        chunkSpeed: this.calculateSpeedByChunk(),
-                        ratioSpeed: this.calculateSpeedByRatio(),
+                        chunkSpeed: this.calculateSpeedByChunk(currentTimestamp),
+                        ratioSpeed: this.calculateSpeedByRatio(currentTimestamp),
+                        downloadSpeed: this.calculateSpeedBySize(currentTimestamp),
                         eta: this.getETA(),
                     };
 
@@ -420,7 +422,7 @@ class ArchiveDownloader extends Downloader {
                             100
                         ).toFixed(2)}% | Avg Speed: ${currentChunkInfo.chunkSpeed} chunks/s or ${
                             currentChunkInfo.ratioSpeed
-                        }x | ETA: ${currentChunkInfo.eta})`
+                        }x | ${prettyPrintTrafficSpeed(currentChunkInfo.downloadSpeed)} | ETA: ${currentChunkInfo.eta})`
                     );
                     logger.debug(`Downloaded chunk size aggregated: ${currentChunkInfo.finishedChunkSize}`);
 
