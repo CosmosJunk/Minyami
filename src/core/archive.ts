@@ -405,6 +405,7 @@ class ArchiveDownloader extends Downloader {
                     const currentChunkInfo = {
                         taskname: task.filename,
                         finishedChunksCount: this.finishedChunkCount,
+                        finishedChunkSize: this.finishedChunkSize,
                         totalChunksCount: this.totalChunksCount,
                         chunkSpeed: this.calculateSpeedByChunk(),
                         ratioSpeed: this.calculateSpeedByRatio(),
@@ -421,6 +422,8 @@ class ArchiveDownloader extends Downloader {
                             currentChunkInfo.ratioSpeed
                         }x | ETA: ${currentChunkInfo.eta})`
                     );
+                    logger.debug(`Downloaded chunk size aggregated: ${currentChunkInfo.finishedChunkSize}`);
+
                     this.finishedFilenames[task.filename] = true;
                     if (!this.noMerge) {
                         this.fileConcentrator.addTasks([

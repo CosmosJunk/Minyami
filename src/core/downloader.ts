@@ -2,6 +2,7 @@ import * as path from "path";
 import * as fs from "fs";
 import * as os from "os";
 import axios, { AxiosRequestConfig } from "axios";
+import { Mutex } from "async-mutex";
 import { EventEmitter } from "events";
 import logger from "../utils/log";
 import { loadM3U8 } from "../utils/m3u8";
@@ -113,6 +114,9 @@ class Downloader extends EventEmitter {
     finishedChunkCount: number = 0;
     /** 已完成的块总长度 */
     finishedChunkLength: number = 0;
+    /** 已下载的块总大小 */
+    finishedChunkSize: number = 0;
+    private mutex = new Mutex();
 
     /** 重试数量 */
     retries: number = 5;
@@ -388,8 +392,13 @@ class Downloader extends EventEmitter {
         return new Promise<void>(async (resolve, reject) => {
             logger.debug(`Downloading ${task.filename}`);
             try {
-                await download(task.chunk.url, path.resolve(this.tempPath, `./${task.filename}`), options);
-                logger.debug(`Downloading ${task.filename} succeed.`);
+                const result = await download(
+                    task.chunk.url,
+                    path.resolve(this.tempPath, `./${task.filename}`),
+                    options
+                );
+                task.chunk.size = result.chunksize;
+                logger.debug(`Downloading ${task.filename} succeed. (size: ${task.chunk.size})`);
                 if (task.chunk.isEncrypted) {
                     const decryptIV = isInitialChunk(task.chunk)
                         ? task.chunk.iv
@@ -407,6 +416,10 @@ class Downloader extends EventEmitter {
                 if (!isInitialChunk(task.chunk)) {
                     this.finishedChunkLength += task.chunk.length;
                 }
+                await this.mutex.runExclusive(() => {
+                    this.finishedChunkSize += +task.chunk.size!; // Optional number addition workaround
+                });
+
                 resolve();
             } catch (e) {
                 logger.warning(

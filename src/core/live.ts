@@ -280,6 +280,7 @@ export default class LiveDownloader extends Downloader {
                     const currentChunkInfo = {
                         taskname: task.filename,
                         finishedChunksCount: this.finishedChunkCount,
+                        finishedChunkSize: this.finishedChunkSize,
                         chunkSpeed: this.calculateSpeedByChunk(),
                         ratioSpeed: this.calculateSpeedByRatio(),
                     };
@@ -287,6 +288,8 @@ export default class LiveDownloader extends Downloader {
                     logger.info(
                         `Processing ${currentChunkInfo.taskname} finished. (${currentChunkInfo.finishedChunksCount} chunks downloaded | Avg Speed: ${currentChunkInfo.chunkSpeed} chunks/s or ${currentChunkInfo.ratioSpeed}x)`
                     );
+                    logger.debug(`Downloaded chunk size aggregated: ${currentChunkInfo.finishedChunkSize}`);
+
                     this.emit("chunk-downloaded", currentChunkInfo);
                     this.checkQueue();
                 })

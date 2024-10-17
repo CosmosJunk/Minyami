@@ -82,7 +82,7 @@ export function mergeToTS(fileList = [], output = "./output.ts") {
 export function download(url: string, path: string, options: AxiosRequestConfig = {}) {
     const CancelToken = axios.CancelToken;
     let source = CancelToken.source();
-    const promise = new Promise<void>(async (resolve, reject) => {
+    const promise = new Promise<{ chunksize: number }>(async (resolve, reject) => {
         try {
             setTimeout(() => {
                 source && source.cancel();
@@ -109,7 +109,9 @@ export function download(url: string, path: string, options: AxiosRequestConfig 
             const tempPath = path + ".t";
             fs.writeFileSync(tempPath, response.data);
             fs.renameSync(tempPath, path);
-            resolve();
+            resolve({
+                chunksize: response.headers["content-length"],
+            });
         } catch (e) {
             reject(e);
         } finally {

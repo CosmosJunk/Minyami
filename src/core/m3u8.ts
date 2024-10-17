@@ -3,8 +3,12 @@ import logger from "../utils/log";
 
 export class M3U8ParseError extends Error {}
 
+/**
+ * Convention: In the context of chunks, "length" refers to duration.
+ */
 interface BaseChunk {
     url: string;
+    size?: number; // Every chunk should take a size, but it is sometimes unnecessary to keep track of.
 }
 
 interface NormalChunk extends BaseChunk {
